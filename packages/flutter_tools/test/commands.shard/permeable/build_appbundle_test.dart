@@ -62,6 +62,15 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
+<<<<<<< HEAD
+=======
+    });
+
+    testUsingContext('alias aab', () async {
+      final BuildAppBundleCommand command =
+          BuildAppBundleCommand(logger: BufferLogger.test());
+      expect(command.aliases, contains('aab'));
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
     });
 
     testUsingContext('build type', () async {
@@ -131,7 +140,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{

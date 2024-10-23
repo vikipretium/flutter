@@ -299,6 +299,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -306,6 +307,7 @@ class PackagesGetCommand extends FlutterCommand {
         await generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: globals.buildSystem,
+          buildTargets: globals.buildTargets,
         );
       } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
         final Environment environment = Environment(
@@ -319,6 +321,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -353,10 +356,24 @@ class PackagesGetCommand extends FlutterCommand {
         command: name,
         touchesPackageConfig: !(isHelp || dryRun),
       );
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'success');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'success');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'success'
+      ));
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'failure');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'failure'
+      ));
       rethrow;
     }
 
@@ -382,6 +399,7 @@ class PackagesGetCommand extends FlutterCommand {
     return findPlugins(rootProject, throwOnError: false);
   })();
 
+<<<<<<< HEAD
   late final String? _androidEmbeddingVersion = (() {
     final FlutterProject? rootProject = _rootProject;
     if (rootProject == null) {
@@ -390,6 +408,9 @@ class PackagesGetCommand extends FlutterCommand {
 
     return rootProject.android.getEmbeddingVersion().toString().split('.').last;
   })();
+=======
+  late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.

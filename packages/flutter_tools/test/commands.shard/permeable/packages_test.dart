@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -40,9 +41,14 @@ void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
     late Directory tempDir;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -212,14 +218,25 @@ void main() {
 
       expect(mockStdio.stdout.writes.map(utf8.decode),
         allOf(
-          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project\.\.\.'))),
+          // The output of pub changed, adding backticks around the directory name.
+          // These regexes are tolerant of the backticks being present or absent.
+          contains(matches(RegExp(r'Resolving dependencies in .+flutter_project`?\.\.\.'))),
           contains(matches(RegExp(r'\+ flutter 0\.0\.0 from sdk flutter'))),
-          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project!'))),
+          contains(matches(RegExp(r'Changed \d+ dependencies in .+flutter_project`?!'))),
         ),
       );
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -231,6 +248,7 @@ void main() {
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('get --offline fetches packages', () async {
@@ -428,6 +446,7 @@ flutter:
             .eventData['packagesProjectModule'],
         true,
       );
+<<<<<<< HEAD
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -464,6 +483,8 @@ flutter:
             .eventData['packagesAndroidEmbeddingVersion'],
         'v1',
       );
+=======
+>>>>>>> 2663184aa79047d0a33a14a3b607954f8fdd8730
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(

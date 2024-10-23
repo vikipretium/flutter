@@ -41,6 +41,9 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugMacOSBundleFlutterAssets(),
   const ProfileMacOSBundleFlutterAssets(),
   const ReleaseMacOSBundleFlutterAssets(),
+  const DebugUnpackMacOS(),
+  const ProfileUnpackMacOS(),
+  const ReleaseUnpackMacOS(),
   // Linux targets
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
@@ -72,11 +75,18 @@ List<Target> _kDefaultTargets = <Target>[
   const DebugIosApplicationBundle(),
   const ProfileIosApplicationBundle(),
   const ReleaseIosApplicationBundle(),
+  const DebugUnpackIOS(),
+  const ProfileUnpackIOS(),
+  const ReleaseUnpackIOS(),
   // Windows targets
-  const UnpackWindows(),
-  const DebugBundleWindowsAssets(),
-  const ProfileBundleWindowsAssets(),
-  const ReleaseBundleWindowsAssets(),
+  const UnpackWindows(TargetPlatform.windows_x64),
+  const UnpackWindows(TargetPlatform.windows_arm64),
+  const DebugBundleWindowsAssets(TargetPlatform.windows_x64),
+  const DebugBundleWindowsAssets(TargetPlatform.windows_arm64),
+  const ProfileBundleWindowsAssets(TargetPlatform.windows_x64),
+  const ProfileBundleWindowsAssets(TargetPlatform.windows_arm64),
+  const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64),
+  const ReleaseBundleWindowsAssets(TargetPlatform.windows_arm64),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -235,6 +245,7 @@ class AssembleCommand extends FlutterCommand {
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       platform: globals.platform,
       engineVersion: artifacts.isLocalEngine
         ? null
@@ -262,7 +273,7 @@ class AssembleCommand extends FlutterCommand {
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-    if (dartDefines.isNotEmpty){
+    if (dartDefines.isNotEmpty) {
       results[kDartDefines] = dartDefines.join(',');
     }
 
